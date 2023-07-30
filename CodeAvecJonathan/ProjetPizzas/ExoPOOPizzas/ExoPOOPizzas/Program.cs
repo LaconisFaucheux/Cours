@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Specialized;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks.Dataflow;
 
@@ -95,13 +98,11 @@ namespace projet_pizza
     }
     class Program
     {
-        static void Main(string[] args)
+        static List<Pizza> GetPizzasFromCode()
         {
-            Console.OutputEncoding = Encoding.UTF8;
-
             List<string> ingredients4Fromages = new List<string>()
             {
-                "Base crème", 
+                "Base crème",
                 "Chèvre",
                 "BleU",
                 "moZZarella",
@@ -145,12 +146,65 @@ namespace projet_pizza
                 new Pizza("THAÎ", 12.5f, false, ingredientsThai),
                 new Pizza("ChèVre MIel", 10.5f, true, ingredientsChevreMiel),
                 new Pizza("ReinE", 8.5f, false, ingredientsReine),
-                new PizzaPerso(),
-                new PizzaPerso()
+                //new PizzaPerso(),
+                //new PizzaPerso()
             };
 
-            CartePizzas = CartePizzas.OrderBy(p => p.Price).ToList(); //Tri du plus petit au plus grand
-            CartePizzas = CartePizzas.OrderByDescending(p => p.Price).ToList(); //Tri du plus grand au plus petit
+            return CartePizzas;
+        }
+        static List<Pizza> GetPizzasFromFile(string fullPath)
+        {
+            List<Pizza> list1 = new List<Pizza>();
+            if (File.Exists(fullPath))
+            {
+                try
+                {
+                    string JsonPizzas = File.ReadAllText(fullPath);
+                    list1 = JsonConvert.DeserializeObject<List<Pizza>>(JsonPizzas).ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erreur: {ex.Message}");
+                    return null;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Le fichier {fullPath} n'existe pas.");
+                return null;
+            }
+
+            return list1;
+        }
+        static List<Pizza> GetPizzasFromUrl(string url)
+        {
+            WebClient webClient = new();
+            string json = webClient.DownloadString(url);
+
+            List<Pizza> listPizzas = json != null ? JsonConvert.DeserializeObject<List<Pizza>>(json) : null;
+
+            return listPizzas;
+        }
+        static void GenerateJsonFile(List<Pizza> list, string fullPath)
+        {
+            string jsonPizzas = JsonConvert.SerializeObject(list);
+            //var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            using (StreamWriter writeStream = File.CreateText(fullPath))
+            {
+                Console.WriteLine($"Début de l'écriture du fichier {fullPath}.");
+                writeStream.WriteLine(jsonPizzas);
+                Console.WriteLine($"Fin de l'écriture du fichier {fullPath}.");
+            }
+        }
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+
+
+
+            #region COMMENTED CODE - DATA CREATION
+            //CartePizzas = CartePizzas.OrderBy(p => p.Price).ToList(); //Tri du plus petit au plus grand
+            //CartePizzas = CartePizzas.OrderByDescending(p => p.Price).ToList(); //Tri du plus grand au plus petit
 
             //Pizza maxPricePizza = CartePizzas[0];
             //Pizza minPricePizza = CartePizzas[0];
@@ -169,19 +223,30 @@ namespace projet_pizza
 
             //CartePizzas = CartePizzas.Where(p => p.Ingredients.Where(i => i.ToLower().Contains("tomate")).ToList().Count > 0).ToList();
             //Console.WriteLine("Les pizzas qui contiennent de la tomate sont:");
-            
 
-            foreach (Pizza pizza in CartePizzas)
-            {
-                pizza.Afficher();
-            }
+            //foreach (Pizza pizza in CartePizzas)
+            //    {
+            //        pizza.Afficher();
+            //    }
 
             //Console.WriteLine($"La pizza la plus chère est :");
             //maxPricePizza.Afficher();
             //Console.WriteLine($"La pizza la moins chère est :");
             //minPricePizza.Afficher();
+            #endregion
 
-
+            //List<Pizza> pizzas = GetPizzasFromCode();
+            //GenerateJsonFile(pizzas, "out/cartePizzas.json");
+            //List<Pizza> pizzas = GetPizzasFromFile("out/cartePizzas.json");
+            List<Pizza> pizzas = GetPizzasFromUrl("http://www.codeavecjonathan.com/res/pizzas2.json");//nom de l'API en fr alors que les noms de mon code sont en EN, ce qui explique le bug
+            foreach (Pizza p in pizzas)
+            {
+                p.Afficher();
+            }
+  
         }
     }
 }
+
+
+//http://www.codeavecjonathan.com/res/pizzas2.json
