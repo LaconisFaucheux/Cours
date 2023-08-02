@@ -3,15 +3,22 @@
 @{
 }
 
-<h1>Authentifiez vous</h1>
+<h1 class="text-center pb-4">Authentifiez vous</h1>
 @if (Model.failedLogin)
 {
     <p class="alert alert-danger">Erreur d'authentification!</p>
 }
-<form method="post">
-    <input type="text" name="username" placeholder="Login"><br>
-    <br />
-    <input type="password" name="password" placeholder="Mot de passe"><br>
-    <br />
-    <button class="btn btn-outline-primary">Se connecter</button>
-</form>
+
+
+<div class="card mx-auto shadow text-center" style="width: 18rem;">
+    <div class="card-body">
+        <form method="post">
+            <input type="text" name="username" placeholder="Login"><br>
+            <br />
+            <input type="password" name="password" placeholder="Mot de passe"><br>
+            <br />
+            <button class="btn btn-outline-primary">Se connecter</button>
+        </form>
+    </div>
+</div>
+
