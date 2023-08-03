@@ -2,5 +2,20 @@
 @model PizzaMama.Pages.MenuPizzasModel
 @{
 }
+<div class="text-center">
+    <h1>Menu des pizzas</h1>
+    
 
-<h1>Menu des pizzas</h1>
+    <ul class="text-left list-unstyled">
+        @foreach(var pizza in Model.cartePizzas)
+        {
+            <li class="mb-4">
+                @pizza.nom - @pizza.prix €<br>
+                <span class="font-italic">@pizza.ingredients</span><br>
+            </li>
+        }
+    </ul>
+
+    <a asp-page="Index">Retour à la page d'accueil</a>
+</div>
+
